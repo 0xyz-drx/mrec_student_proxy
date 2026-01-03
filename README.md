@@ -1,4 +1,4 @@
-- STILL IN dEV
+- STILL IN DEV
 
 ## Features
 - login (username, password)
@@ -7,7 +7,7 @@
 - OTP based login(planned)*
 
 ## API Endpoints
-- /login
-- /student/{rollno}/basic
-- /student/{rollno}/photo
-- /student/{rollno}/results
+- POST /auth/login
+- GET /student/{rollno}/basic
+- GET /student/{rollno}/photo
+- GET /student/{rollno}/results
