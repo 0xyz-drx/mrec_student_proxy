@@ -1,8 +1,8 @@
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
 
-from app.api.v1.login import router as auth_router
+from app.api.v1.login import auth_router
 from app.routes.student import router as student_router
 
 load_dotenv()
@@ -19,4 +19,3 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(student_router)
-
