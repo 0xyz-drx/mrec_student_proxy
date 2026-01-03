@@ -27,10 +27,15 @@ def generate_token(data: Dict) -> str:
 
 def decode_token(token: str) -> Dict:
     try:
-        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGO])  # pyright: ignore[reportArgumentType]
+        return jwt.decode(
+            token,
+            JWT_SECRET,
+            algorithms=[JWT_ALGO],
+            options={"require": ["exp"]},
+        )
     except JWTError:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
         )
 

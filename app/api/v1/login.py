@@ -2,7 +2,7 @@
 import os
 
 import httpx
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.core.jwt_auth import generate_token
@@ -18,10 +18,15 @@ class LoginRequest(BaseModel):
     password: str
 
 
-@auth_router.post("/login")
-async def login(data: LoginRequest) -> dict:
-    async with httpx.AsyncClient(verify=False) as client:
-        response = await client.post(
+client = httpx.AsyncClient(
+    timeout=5.0,
+    verify=True,  # FIXED
+)
+
+
+async def login(data: LoginRequest):
+    try:
+        resp = await client.post(
             SIGN_URL,
             json={
                 "username": data.username,
@@ -31,17 +36,26 @@ async def login(data: LoginRequest) -> dict:
                 "domain": "REMOVED_DOMAIN",
             },
         )
-        if response.status_code == 200:
-            token = generate_token(
-                {
-                    "roll_no": response.json()["username"],
-                    "role": response.json()["roles"],
-                }
-            )
-            return {
-                "token": token,
-                "token_type": "Bearer",
-                "expires_in": 1800,
-            }
-        else:
-            return {"error": "Login failed", "response": response.json()}
+    except httpx.RequestError:
+        raise HTTPException(503, "Auth service unreachable")
+
+    if resp.status_code != 200:
+        raise HTTPException(401, "Invalid credentials")
+
+    payload = resp.json()
+
+    if "username" not in payload or "roles" not in payload:
+        raise HTTPException(502, "Malformed auth response")
+
+    token = generate_token(
+        {
+            "roll_no": payload["username"],
+            "role": payload["roles"],
+        }
+    )
+
+    return {
+        "access_token": token,
+        "token_type": "Bearer",
+        "expires_in": 1800,
+    }
