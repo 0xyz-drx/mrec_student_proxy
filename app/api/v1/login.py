@@ -24,6 +24,7 @@ client = httpx.AsyncClient(
 )
 
 
+@auth_router.post("/login")
 async def login(data: LoginRequest):
     try:
         resp = await client.post(
