@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1.login import auth_router
+from app.routes.auth import auth_router
 from app.routes.student import router as student_router
 
 load_dotenv()

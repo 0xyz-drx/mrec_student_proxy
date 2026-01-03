@@ -29,7 +29,7 @@ def decode_token(token: str) -> Dict:
     try:
         return jwt.decode(
             token,
-            JWT_SECRET,
+            JWT_SECRET,  # pyright: ignore[reportArgumentType]
             algorithms=[JWT_ALGO],
             options={"require": ["exp"]},
         )

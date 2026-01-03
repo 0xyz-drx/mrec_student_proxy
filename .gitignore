@@ -1,6 +1,8 @@
 
 *.old
 *.new
+*.new.py
+
 __pycache__/
 .venv/
 
