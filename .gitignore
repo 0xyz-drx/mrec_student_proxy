@@ -1,21 +1,58 @@
+.env
 
-*.old
-*.new
-__pycache__/
+.python-version
+
 .venv/
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
 
+# ===== Virtual Envs =====
+.venv/
+venv/
+ENV/
+env/
+
+# ===== Python tooling =====
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ===== Build / dist =====
 build/
 dist/
 *.egg-info/
+
+# ===== Environment / secrets =====
 .env
 .env.*
 *.pem
 *.key
+
+# ===== IDE / Editor =====
 .vscode/
 .idea/
 *.swp
 *.swo
+
+# ===== OS junk =====
+.DS_Store
+Thumbs.db
+
+# ===== Logs =====
 *.log
+
+# ===== Docker =====
 .dockerignore
+
+# ===== Node (if any) =====
+node_modules/
+
+# ===== Git (extra safety) =====
 .git/
 .gitignore

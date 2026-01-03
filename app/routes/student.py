@@ -1,15 +1,13 @@
 import os
-
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
-
 from app.core.jwt_auth import require_auth
 
 router = APIRouter(prefix="/student", tags=["student"])
 
-IMG_URL = os.getenv("IMG_URL", "")
-BASIC_INFO_URL = os.getenv("BASIC_INFO_URL", "")
-SEM_RESULTS_URL = os.getenv("OVERALL_MARKS_SHEET", "")
+IMG_URL = os.getenv("IMG_URL")
+BASIC_INFO_URL = os.getenv("BASIC_INFO_URL")
+SEM_RESULTS_URL = os.getenv("OVERALL_MARKS_SHEET")
 
 
 @router.get("/{roll_no}/basic")
@@ -55,3 +53,4 @@ async def get_photo(
             "content_type": r.headers.get("content-type"),
             "image": r.content.hex(),
         }
+

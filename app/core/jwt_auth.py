@@ -2,10 +2,10 @@ import os
 from datetime import datetime, timedelta
 from typing import Dict
 
-from dotenv import load_dotenv
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -22,15 +22,15 @@ security = HTTPBearer()
 def generate_token(data: Dict) -> str:
     payload = data.copy()
     payload["exp"] = datetime.utcnow() + timedelta(minutes=JWT_EXP_MINUTES)
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGO)  # pyright: ignore[reportArgumentType]
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGO)
 
 
 def decode_token(token: str) -> Dict:
     try:
-        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGO])  # pyright: ignore[reportArgumentType]
+        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGO])
     except JWTError:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
         )
 
@@ -39,3 +39,4 @@ def require_auth(
     creds: HTTPAuthorizationCredentials = Depends(security),
 ) -> Dict:
     return decode_token(creds.credentials)
+
