@@ -1,4 +1,3 @@
-# from dotenv import load_dotenv
 import os
 
 import httpx
@@ -10,7 +9,10 @@ from app.core.jwt_auth import generate_token
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-SIGN_URL = os.getenv("SIGN_URL", "")
+SIGN_URL = os.getenv("SIGN_URL")
+
+if not SIGN_URL:
+    raise ValueError("SIGN_URL environment variable is not set")
 
 
 class LoginRequest(BaseModel):
@@ -18,17 +20,16 @@ class LoginRequest(BaseModel):
     password: str
 
 
-client = httpx.AsyncClient(
-    timeout=5.0,
-    verify=True,  # FIXED
-)
+client = httpx.AsyncClient(timeout=5.0, verify=False)
 
 
 @auth_router.post("/login")
 async def login(data: LoginRequest):
     try:
+        print(data.username)
+        print(data.password)
         resp = await client.post(
-            SIGN_URL,
+            SIGN_URL,  # pyright: ignore[reportArgumentType]
             json={
                 "username": data.username,
                 "password": data.password,
@@ -37,7 +38,9 @@ async def login(data: LoginRequest):
                 "domain": "REMOVED_DOMAIN",
             },
         )
-    except httpx.RequestError:
+
+    except httpx.RequestError as e:
+        print(e)
         raise HTTPException(503, "Auth service unreachable")
 
     if resp.status_code != 200:
