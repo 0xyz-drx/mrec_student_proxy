@@ -32,9 +32,9 @@
 ## API Endpoints
 
 - `POST /auth/login`  
-- `GET /student/{rollno}/basic`  
-- `GET /student/{rollno}/photo`  
-- `GET /student/{rollno}/results`
+- `GET /student/me/basic`  
+- `GET /student/me/photo`  
+- `GET /student/me/results`
 
 ---
 
