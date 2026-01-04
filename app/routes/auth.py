@@ -35,7 +35,7 @@ async def login(data: LoginRequest):
                 "password": data.password,
                 "ipAddress": "127.0.0.1",
                 "module": "ExamCell",
-                "domain": "REMOVED_DOMAIN",
+                "domain": os.getenv("EXAMCELL_DOMAIN"),
             },
         )
 
