@@ -7,6 +7,8 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 
+from .logging import critical, debug, error, info, warn
+
 load_dotenv()
 
 JWT_SECRET = os.getenv("JWT_SECRET")
@@ -14,6 +16,7 @@ JWT_ALGO = "HS256"
 JWT_EXP_MINUTES = 30
 
 if not JWT_SECRET:
+    critical("JWT_SECRET is not set in environment variables")
     raise RuntimeError("JWT_SECRET is not set")
 
 security = HTTPBearer()
@@ -22,18 +25,26 @@ security = HTTPBearer()
 def generate_token(data: Dict) -> str:
     payload = data.copy()
     payload["exp"] = datetime.utcnow() + timedelta(minutes=JWT_EXP_MINUTES)
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGO)  # pyright: ignore[reportArgumentType]
+    token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGO)
+    info(f"Generated JWT for roll_no: {data.get('roll_no')}")
+    return token
 
 
 def decode_token(token: str) -> Dict:
-    try:
-        return jwt.decode(
-            token,
-            JWT_SECRET,  # pyright: ignore[reportArgumentType]
-            algorithms=[JWT_ALGO],
-            options={"require": ["exp"]},
+    if not token:
+        critical("Token is missing")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token is missing",
         )
-    except JWTError:
+    try:
+        payload = jwt.decode(
+            token, JWT_SECRET, algorithms=[JWT_ALGO], options={"require": ["exp"]}
+        )
+        debug(f"Validated JWT for roll_no: {payload.get('roll_no')}")
+        return payload
+    except JWTError as e:
+        warn(f"Invalid or expired token attempt: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
