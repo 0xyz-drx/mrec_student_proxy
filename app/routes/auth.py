@@ -8,11 +8,14 @@ from app.core.jwt_auth import generate_token
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
-
 SIGN_URL = os.getenv("SIGN_URL")
+EXAMCELL_DOMAIN = os.getenv("EXAMCELL_DOMAIN")
 
 if not SIGN_URL:
-    raise ValueError("SIGN_URL environment variable is not set")
+    raise RuntimeError("SIGN_URL environment variable is not set")
+
+if not EXAMCELL_DOMAIN:
+    raise RuntimeError("EXAMCELL_DOMAIN environment variable is not set")
 
 
 class LoginRequest(BaseModel):
@@ -20,33 +23,31 @@ class LoginRequest(BaseModel):
     password: str
 
 
-client = httpx.AsyncClient(timeout=5.0, verify=False)
-
-
 @auth_router.post("/login")
 async def login(data: LoginRequest):
     try:
-        print(data.username)
-        print(data.password)
-        resp = await client.post(
-            SIGN_URL,  # pyright: ignore[reportArgumentType]
-            json={
-                "username": data.username,
-                "password": data.password,
-                "ipAddress": "127.0.0.1",
-                "module": "ExamCell",
-                "domain": os.getenv("EXAMCELL_DOMAIN"),
-            },
-        )
+        async with httpx.AsyncClient(timeout=5.0, verify=False) as client:
+            resp = await client.post(
+                SIGN_URL,
+                json={
+                    "username": data.username,
+                    "password": data.password,
+                    "ipAddress": "127.0.0.1",
+                    "module": "ExamCell",
+                    "domain": EXAMCELL_DOMAIN,
+                },
+            )
 
-    except httpx.RequestError as e:
-        print(e)
+    except httpx.RequestError:
         raise HTTPException(503, "Auth service unreachable")
 
     if resp.status_code != 200:
         raise HTTPException(401, "Invalid credentials")
 
-    payload = resp.json()
+    try:
+        payload = resp.json()
+    except ValueError:
+        raise HTTPException(502, "Invalid auth service response")
 
     if "username" not in payload or "roles" not in payload:
         raise HTTPException(502, "Malformed auth response")
