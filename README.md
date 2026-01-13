@@ -1,3 +1,5 @@
+<a href="https://www.digitalocean.com/?refcode=9098f5d46a71&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge"><img src="https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg" alt="DigitalOcean Referral Badge" /></a>
+
 > **Status: Still in Development**
 >
 > This project is under  development. Security hardening features such as
